@@ -3,30 +3,19 @@
 // Application State
 const state = {
     // Current telemetry readings
-    speed: 400.0,      // Solar wind speed (km/s)
-    density: 5.0,      // Proton density (p/cm3)
-    bz: 0.0,           // IMF Bz index (nT)
-    temperature: 150000.0, // plasma temp (K)
-    time: null,        // timestamp of reading
-
-    // Simulation overrides & controls
-    manualSpeed: 400,
-    manualBz: 0.0,
-    isManualMode: false,
+    speed: 400.0,          // Solar wind speed (km/s)
+    density: 5.0,          // Proton density (p/cm3)
+    bz: 0.0,               // IMF Bz index (nT)
+    temperature: 150000.0, // Plasma temperature (K)
+    time: null,            // Timestamp of reading
 
     // API stats
-    apiStatus: 'CONNECTING', // CONNECTING, ONLINE, OFFLINE
+    apiStatus: 'CONNECTING', // CONNECTING, ONLINE, DISCONNECTED
 };
 
 // UI Elements
 const stationTimeEl = document.getElementById('station-time');
 const apiStatusEl = document.getElementById('api-status');
-
-// Sliders and Display values
-const speedSlider = document.getElementById('control-speed-slider');
-const bzSlider = document.getElementById('control-bz-slider');
-const speedSliderVal = document.getElementById('control-speed-val');
-const bzSliderVal = document.getElementById('control-bz-val');
 
 // Overlay elements
 const overlayBz = document.getElementById('overlay-bz');
@@ -117,46 +106,11 @@ tabButtons.forEach(btn => {
     });
 });
 
-// Setup Slider Controllers (Overrides)
-speedSlider.addEventListener('input', (e) => {
-    state.isManualMode = true;
-    state.manualSpeed = parseFloat(e.target.value);
-    speedSliderVal.textContent = state.manualSpeed;
-    
-    // Propagate manually to visualizers
-    overlaySpeed.textContent = `${state.manualSpeed.toFixed(1)} km/s`;
-    
-    // Render dynamic updates on table as manually overwritten
-    valSpeed.textContent = `${state.manualSpeed.toFixed(0)}`;
-    stateSpeed.textContent = 'OVERRIDE';
-    stateSpeed.style.color = 'var(--warning-color)';
-});
-
-bzSlider.addEventListener('input', (e) => {
-    state.isManualMode = true;
-    state.manualBz = parseFloat(e.target.value);
-    bzSliderVal.textContent = state.manualBz.toFixed(1);
-    
-    // Propagate
-    overlayBz.textContent = `${state.manualBz.toFixed(2)} nT`;
-    if (state.manualBz < 0) {
-        overlayBz.className = 'value text-danger';
-    } else if (state.manualBz > 0) {
-        overlayBz.className = 'value text-success';
-    } else {
-        overlayBz.className = 'value';
-    }
-
-    valBz.textContent = state.manualBz.toFixed(2);
-    stateBz.textContent = 'OVERRIDE';
-    stateBz.style.color = 'var(--warning-color)';
-});
-
 // Particle Definition
 class SolarParticle {
     constructor(width, height) {
         this.reset(width, height);
-        // randomize starting position X along the screen width to bootstrap simulation
+        // Randomize starting position X along the screen width
         this.x = Math.random() * width;
     }
 
@@ -168,7 +122,7 @@ class SolarParticle {
         this.radius = 1 + Math.random() * 2;
     }
 
-    update(width, height, speed, EarthCenter, magnetopauseSubsolar, bz) {
+    update(width, height, speed, EarthCenter, magnetopauseSubsolar) {
         // Speed scaling
         const step = (speed / 100) * 1.5;
         this.x += step;
@@ -176,20 +130,15 @@ class SolarParticle {
         // Bending math around Earth's magnetopause
         const dx = EarthCenter.x - this.x;
         const dy = this.y - EarthCenter.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
 
         // Define a boundary curve (parabola/hyperbola) for magnetopause
-        // magnetopause boundary starts at subsolar point and curves outward
-        // Equation: x = subsolar_x - (y - center_y)^2 / curvature_constant
         const curvature = 350; // controls how broad the magnetospheric sheath is
         const boundaryX = magnetopauseSubsolar - (dy * dy) / curvature;
 
         // If particle crosses boundary, deflect it along the boundary
         if (this.x > boundaryX && dx > 0) {
-            // Push particle outward along the curvature
             const pushDir = this.y > EarthCenter.y ? 1 : -1;
             this.y += step * 0.8 * pushDir;
-            // Dampen X movement to look like compression sheath flow
             this.x += step * 0.2;
         }
 
@@ -212,7 +161,7 @@ class SolarParticle {
 // Instantiate particles
 const MAX_PARTICLES = 120;
 for (let i = 0; i < MAX_PARTICLES; i++) {
-    particleList.push(new SolarParticle(800, 500)); // Default sizing, will handle dynamically
+    particleList.push(new SolarParticle(800, 500));
 }
 
 // 60FPS Simulation Loop
@@ -227,9 +176,9 @@ function animationLoop(timestamp) {
         overlayFps.textContent = fpsDisplay.toFixed(1);
     }
 
-    // Dynamic Variables (read from state / controls)
-    const currentSpeed = state.isManualMode ? state.manualSpeed : state.speed;
-    const currentBz = state.isManualMode ? state.manualBz : state.bz;
+    // Dynamic Variables (read strictly from NOAA-updated state)
+    const currentSpeed = state.speed;
+    const currentBz = state.bz;
 
     // Get current client layout width/height
     const w = canvas.width / window.devicePixelRatio;
@@ -242,9 +191,7 @@ function animationLoop(timestamp) {
     };
     const EarthRadius = 24;
 
-    // Magnetopause subsolar compression point (determined by Wind Speed & Bz)
-    // Strong wind compression decreases boundary distance
-    // Negative Bz erodes magnetopause subsolar point (brings it closer to Earth)
+    // Magnetopause subsolar compression point
     const compressionFactor = (currentSpeed - 400) / 600; // range 0 to 1
     const erosionFactor = currentBz < 0 ? (Math.abs(currentBz) / 25) * 30 : 0;
     const baseSubsolarDistance = 140; // normal distance in pixels
@@ -287,7 +234,7 @@ function animationLoop(timestamp) {
 
     // Update & Draw Solar Wind Particles
     particleList.forEach(particle => {
-        particle.update(w, h, currentSpeed, EarthCenter, magnetopauseSubsolar, currentBz);
+        particle.update(w, h, currentSpeed, EarthCenter, magnetopauseSubsolar);
         particle.draw(ctx);
     });
 
@@ -297,7 +244,6 @@ function animationLoop(timestamp) {
     ctx.lineWidth = 1.5;
     ctx.setLineDash([5, 5]);
     ctx.beginPath();
-    // Magnetopause sheath path
     for (let dy = -h * 0.5; dy < h * 0.5; dy += 5) {
         const yCoord = EarthCenter.y + dy;
         const curvature = 320;
@@ -309,27 +255,22 @@ function animationLoop(timestamp) {
     ctx.restore();
 
     // Draw Earth Magnetosphere Vector Lines (Bezier loops)
-    // Draw 7 concentric magnetic loops on both day-side and night-side
     ctx.save();
     ctx.strokeStyle = 'rgba(51, 255, 51, 0.7)';
     ctx.lineWidth = 1.2;
 
     const loops = [0.4, 0.7, 1.0, 1.3, 1.7, 2.1, 2.5];
-    loops.forEach((scale, index) => {
-        // Bz dynamically affects the tilt / symmetry of field lines (dipole tilt)
+    loops.forEach((scale) => {
         const bzAngleSkew = (currentBz / 25) * 0.15; // skew control points
 
         // DAY-SIDE loops (Left side, compressed)
         ctx.beginPath();
-        // Starts at north pole
         ctx.moveTo(EarthCenter.x, EarthCenter.y - EarthRadius);
         
-        // Control point 1 pushes left towards the compressed magnetopause boundary
         const dayCompression = Math.max(30, (magnetopauseSubsolar - EarthCenter.x) * -0.65 * scale);
         const cp1x = EarthCenter.x - dayCompression;
         const cp1y = EarthCenter.y - (45 * scale) + (bzAngleSkew * 100);
 
-        // Control point 2 pushes left and towards the south pole
         const cp2x = EarthCenter.x - dayCompression;
         const cp2y = EarthCenter.y + (45 * scale) + (bzAngleSkew * 100);
 
@@ -340,7 +281,6 @@ function animationLoop(timestamp) {
         ctx.beginPath();
         ctx.moveTo(EarthCenter.x, EarthCenter.y - EarthRadius);
 
-        // Control points stretch far to the right (representing magnetotail)
         const tailLength = 220 * scale;
         const tcp1x = EarthCenter.x + (tailLength * 0.5);
         const tcp1y = EarthCenter.y - (60 * scale) - (bzAngleSkew * 80);
@@ -353,9 +293,8 @@ function animationLoop(timestamp) {
     });
     ctx.restore();
 
-    // Draw Earth (Space Station focus)
+    // Draw Earth
     ctx.save();
-    // Outer glow
     const shadowGrad = ctx.createRadialGradient(EarthCenter.x, EarthCenter.y, EarthRadius - 5, EarthCenter.x, EarthCenter.y, EarthRadius + 8);
     shadowGrad.addColorStop(0, 'rgba(3, 8, 4, 1)');
     shadowGrad.addColorStop(0.6, 'rgba(51, 255, 51, 0.3)');
@@ -365,7 +304,6 @@ function animationLoop(timestamp) {
     ctx.arc(EarthCenter.x, EarthCenter.y, EarthRadius + 8, 0, Math.PI * 2);
     ctx.fill();
 
-    // Earth Sphere Core
     ctx.fillStyle = '#030804';
     ctx.strokeStyle = 'var(--primary-color)';
     ctx.lineWidth = 2;
@@ -374,7 +312,6 @@ function animationLoop(timestamp) {
     ctx.fill();
     ctx.stroke();
 
-    // Draw internal globe grids (vector latitude lines)
     ctx.strokeStyle = 'rgba(51, 255, 51, 0.4)';
     ctx.lineWidth = 1;
     ctx.beginPath();
@@ -384,7 +321,6 @@ function animationLoop(timestamp) {
     ctx.arc(EarthCenter.x, EarthCenter.y, EarthRadius, 5 * Math.PI / 6, 7 * Math.PI / 6);
     ctx.stroke();
 
-    // Vector Earth Axis
     ctx.strokeStyle = 'rgba(51, 255, 51, 0.6)';
     ctx.beginPath();
     ctx.moveTo(EarthCenter.x, EarthCenter.y - EarthRadius - 6);
@@ -451,89 +387,46 @@ function getValueState(value, type) {
 
 // Update DOM Telemetry Values
 function updateTelemetryUI() {
-    // If not in manual override mode, update sliders to match fetched NOAA state
-    if (!state.isManualMode) {
-        speedSlider.value = state.speed;
-        speedSliderVal.textContent = Math.round(state.speed);
-        bzSlider.value = state.bz;
-        bzSliderVal.textContent = state.bz.toFixed(1);
-
-        overlaySpeed.textContent = `${state.speed.toFixed(1)} km/s`;
-        overlayBz.textContent = `${state.bz.toFixed(2)} nT`;
-        
-        if (state.bz < 0) {
-            overlayBz.className = 'value text-danger';
-        } else if (state.bz > 0) {
-            overlayBz.className = 'value text-success';
-        } else {
-            overlayBz.className = 'value';
-        }
-
-        valSpeed.textContent = Math.round(state.speed);
-        valDensity.textContent = state.density.toFixed(2);
-        valBz.textContent = state.bz.toFixed(2);
-        valTemp.textContent = Math.round(state.temperature).toLocaleString();
-
-        // States & Colors
-        const speedState = getValueState(state.speed, 'speed');
-        stateSpeed.textContent = speedState.text;
-        stateSpeed.style.color = speedState.color;
-
-        const densityState = getValueState(state.density, 'density');
-        stateDensity.textContent = densityState.text;
-        stateDensity.style.color = densityState.color;
-
-        const bzState = getValueState(state.bz, 'bz');
-        stateBz.textContent = bzState.text;
-        stateBz.style.color = bzState.color;
-
-        stateTemp.textContent = 'NOMINAL';
-        stateTemp.style.color = 'var(--primary-color)';
-    } else {
-        // Manual override mode visual aids: update table for non-overridden metrics still
-        valDensity.textContent = state.density.toFixed(2);
-        valTemp.textContent = Math.round(state.temperature).toLocaleString();
-    }
-}
-
-// Fallback dynamic simulator if API gets blocked (CORS)
-function runSimulationTelemetry() {
-    state.apiStatus = 'SIMULATED';
-    apiStatusEl.textContent = 'SIM_MODE';
-    apiStatusEl.className = 'status-connecting';
-
-    // Walk state slightly to simulate active telemetry variations
-    const timeNow = new Date().toISOString().replace('T', ' ').substring(11, 19);
+    overlaySpeed.textContent = `${state.speed.toFixed(1)} km/s`;
+    overlayBz.textContent = `${state.bz.toFixed(2)} nT`;
     
-    // Sim drift
-    state.speed += (Math.random() - 0.5) * 12;
-    state.speed = Math.max(300, Math.min(850, state.speed));
-
-    state.density += (Math.random() - 0.5) * 0.8;
-    state.density = Math.max(1.0, Math.min(22.0, state.density));
-
-    state.bz += (Math.random() - 0.5) * 1.5;
-    state.bz = Math.max(-15.0, Math.min(15.0, state.bz));
-
-    state.temperature += (Math.random() - 0.5) * 15000;
-    state.temperature = Math.max(50000, Math.min(350000, state.temperature));
-
-    updateTelemetryUI();
-
-    addLog(solarWindLog, `[SIM_RX] Speed: ${Math.round(state.speed)} km/s | Density: ${state.density.toFixed(2)} p/cm³ | Bz: ${state.bz.toFixed(2)} nT`, 'info');
-
-    // Run alerts checks
-    const alerts = checkSpaceWeatherAlerts(state.speed, state.bz);
-    if (alerts.alertLevel !== 'G0') {
-        addLog(alertsLogWindow, `[WARN] Geomagnetic Event detected! Rating: ${alerts.alertLevel} (${alerts.statusText})`, alerts.type);
+    if (state.bz < 0) {
+        overlayBz.className = 'value text-danger';
+    } else if (state.bz > 0) {
+        overlayBz.className = 'value text-success';
+    } else {
+        overlayBz.className = 'value';
     }
+
+    valSpeed.textContent = Math.round(state.speed);
+    valDensity.textContent = state.density.toFixed(2);
+    valBz.textContent = state.bz.toFixed(2);
+    valTemp.textContent = Math.round(state.temperature).toLocaleString();
+
+    // States & Colors
+    const speedState = getValueState(state.speed, 'speed');
+    stateSpeed.textContent = speedState.text;
+    stateSpeed.style.color = speedState.color;
+
+    const densityState = getValueState(state.density, 'density');
+    stateDensity.textContent = densityState.text;
+    stateDensity.style.color = densityState.color;
+
+    const bzState = getValueState(state.bz, 'bz');
+    stateBz.textContent = bzState.text;
+    stateBz.style.color = bzState.color;
+
+    stateTemp.textContent = 'NOMINAL';
+    stateTemp.style.color = 'var(--primary-color)';
 }
 
 // Main poll function
 async function pollNOAAData() {
     try {
-        apiStatusEl.textContent = 'POLLING';
-        apiStatusEl.className = 'status-connecting';
+        if (state.apiStatus !== 'DISCONNECTED') {
+            apiStatusEl.textContent = 'POLLING';
+            apiStatusEl.className = 'status-connecting';
+        }
 
         // Fetch plasma stream
         const plasmaResponse = await fetch(PLASMA_URL);
@@ -601,20 +494,27 @@ async function pollNOAAData() {
         }
 
     } catch (error) {
-        console.warn('NOAA API connection failed. Reverting to local simulation telemetry loop:', error.message);
-        addLog(solarWindLog, `[WARN] Connect failed. Reason: CORS/Blocked. Starting simulated receiver node...`, 'warning');
+        console.warn('NOAA API connection failed. Freezing telemetry on last state:', error.message);
         
-        // Initial simulated step
-        runSimulationTelemetry();
+        state.apiStatus = 'DISCONNECTED';
+        apiStatusEl.textContent = 'FEED STATUS: DISCONNECTED';
+        apiStatusEl.className = 'status-error';
+
+        addLog(solarWindLog, `[ERROR] Connection failed. Holding vectors on last state (${Math.round(state.speed)} km/s, ${state.bz.toFixed(1)} nT).`, 'danger');
         
-        // Switch to simulation interval
-        clearInterval(pollingInterval);
-        pollingInterval = setInterval(runSimulationTelemetry, 15000); // Quick update loops for simulation preview
+        // Update table indicators to reflect warning/unknown hold status
+        stateSpeed.textContent = 'HOLDING';
+        stateSpeed.style.color = 'var(--warning-color)';
+        stateDensity.textContent = 'HOLDING';
+        stateDensity.style.color = 'var(--warning-color)';
+        stateBz.textContent = 'HOLDING';
+        stateBz.style.color = 'var(--warning-color)';
+        stateTemp.textContent = 'HOLDING';
+        stateTemp.style.color = 'var(--warning-color)';
     }
 }
 
-// Launch telemetry schedule
+// Launch telemetry schedule (60s loop)
 let pollingInterval = setInterval(pollNOAAData, 60000);
 // Initial trigger after 2 seconds to allow interface setup lines to display
 setTimeout(pollNOAAData, 2000);
-
