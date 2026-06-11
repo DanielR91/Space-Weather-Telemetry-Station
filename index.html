@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Weather Telemetry Station - SWPC Monitor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- CRT Effect Layers -->
+    <div class="crt-overlay"></div>
+    <div class="scanlines"></div>
+    <div class="screen-flicker"></div>
+
+    <div class="terminal-container">
+        <!-- Station Header -->
+        <header class="terminal-header">
+            <div class="header-left">
+                <span class="blink-fast">■</span> SWPC TELEMETRY STATION v1.0.8 // SYS_LOC: EARTH_GEO_ORBIT
+            </div>
+            <div class="header-right">
+                STATION_TIME: <span id="station-time">--:--:-- UTC</span> | NODE: <span id="api-status" class="status-active">CONNECTING</span>
+            </div>
+        </header>
+
+        <!-- Main Wide-Screen Grid -->
+        <main class="grid-container">
+            <!-- Left Panel: 55% Magnetosphere Simulation -->
+            <section class="left-panel">
+                <div class="panel-header">
+                    <span class="panel-title">[ MAGNETOSPHERIC FIELD LINES & PARTICLE DEFLECTION ]</span>
+                    <span class="panel-meta">SCALE: 1px = 120km | REFRESH: 60Hz</span>
+                </div>
+                <div class="canvas-wrapper">
+                    <canvas id="magnetosphere-canvas"></canvas>
+                    
+                    <!-- Overlay Telemetry Stats (Floating) -->
+                    <div class="overlay-stats">
+                        <div class="stat-item">
+                            <span class="label">MAG_INDEX (Bz):</span>
+                            <span id="overlay-bz" class="value text-warning">0.00 nT</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="label">WIND_SPEED:</span>
+                            <span id="overlay-speed" class="value">000.0 km/s</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="label">DEFLECTION_EFF:</span>
+                            <span id="overlay-deflection" class="value">100.0%</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="label">SIM_FPS:</span>
+                            <span id="overlay-fps" class="value">60.0</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-footer">
+                    <span>GRID STATE: ACTIVE</span>
+                    <span>WIND STREAM VECTOR: [x:-1.0, y:0.0, z:0.0]</span>
+                </div>
+            </section>
+
+            <!-- Right Panel: 45% Controls & Terminal Tab Block -->
+            <section class="right-panel">
+                <!-- Matrix Tab Header -->
+                <div class="tab-header">
+                    <button class="tab-btn active" data-tab="live-solar-wind">
+                        [ LIVE SOLAR WIND ]
+                    </button>
+                    <button class="tab-btn" data-tab="alerts-log">
+                        [ SOLAR FLARES & ALERTS ]
+                    </button>
+                </div>
+
+                <!-- Tab Content Panel -->
+                <div class="tab-content active" id="live-solar-wind">
+                    <!-- Real-Time Monospace Grid Table -->
+                    <div class="data-section">
+                        <div class="section-title">> TELEMETRY STATE REGISTER</div>
+                        <table class="telemetry-table">
+                            <thead>
+                                <tr>
+                                    <th>METRIC</th>
+                                    <th>VALUE</th>
+                                    <th>UNIT</th>
+                                    <th>STATE</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>SW_SPEED (Vw)</td>
+                                    <td id="val-speed" class="text-highlight">---.-</td>
+                                    <td>km/s</td>
+                                    <td id="state-speed" class="state-indicator">WAITING</td>
+                                </tr>
+                                <tr>
+                                    <td>PROTON_DENSITY (Np)</td>
+                                    <td id="val-density" class="text-highlight">--.--</td>
+                                    <td>p/cm³</td>
+                                    <td id="state-density" class="state-indicator">WAITING</td>
+                                </tr>
+                                <tr>
+                                    <td>IMF_MAGNETIC_Bz</td>
+                                    <td id="val-bz" class="text-highlight">--.--</td>
+                                    <td>nT</td>
+                                    <td id="state-bz" class="state-indicator">WAITING</td>
+                                </tr>
+                                <tr>
+                                    <td>TEMP_PLASMA</td>
+                                    <td id="val-temp" class="text-highlight">------</td>
+                                    <td>K</td>
+                                    <td id="state-temp" class="state-indicator">WAITING</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Terminal Scroll Logs -->
+                    <div class="terminal-logs-section">
+                        <div class="section-title">> RAW TELEMETRY DATASTREAM</div>
+                        <div class="terminal-log-window" id="solar-wind-log">
+                            <div class="log-line text-dim">[2026-06-11 20:20:00] Initializing local receiver nodes...</div>
+                            <div class="log-line text-dim">[2026-06-11 20:20:01] Searching for active NOAA payload streams...</div>
+                            <div class="log-line">[2026-06-11 20:20:02] Connected. Establishing telemetry polling interval (60s)...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alerts Content Panel -->
+                <div class="tab-content" id="alerts-log">
+                    <div class="data-section">
+                        <div class="section-title">> NOAA ALERTS & ALERT THRESHOLDS</div>
+                        <div class="alert-thresholds">
+                            <div class="threshold-item">
+                                <span class="badge badge-normal">G1</span>
+                                <span>Minor Storm (Bz &lt; -5 nT or Wind &gt; 500 km/s)</span>
+                            </div>
+                            <div class="threshold-item">
+                                <span class="badge badge-warning">G3</span>
+                                <span>Strong Storm (Bz &lt; -10 nT or Wind &gt; 700 km/s)</span>
+                            </div>
+                            <div class="threshold-item">
+                                <span class="badge badge-danger">G5</span>
+                                <span>Extreme Storm (Bz &lt; -20 nT or Wind &gt; 900 km/s)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="terminal-logs-section">
+                        <div class="section-title">> GEOMAGNETIC ALERTS DETECTOR LOG</div>
+                        <div class="terminal-log-window" id="alerts-log-window">
+                            <div class="log-line text-dim">[SYSTEM SYSTEM] Monitoring Space Weather Prediction Center notifications...</div>
+                            <div class="log-line text-success">[STABLE] Magnetopause deflection rates at normal capacity.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Manual Parameters Override (For simulation review/play) -->
+                <div class="control-panel">
+                    <div class="section-title">> SIMULATION VECTOR CONTROL OVERRIDES</div>
+                    <div class="controls-grid">
+                        <div class="control-group">
+                            <label for="control-speed-slider">Wind Speed (Vw): <span id="control-speed-val">400</span> km/s</label>
+                            <input type="range" id="control-speed-slider" min="200" max="1000" value="400">
+                        </div>
+                        <div class="control-group">
+                            <label for="control-bz-slider">Magnetic Bz Index: <span id="control-bz-val">0.0</span> nT</label>
+                            <input type="range" id="control-bz-slider" min="-25" max="25" value="0" step="0.5">
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="terminal-footer">
+            <div class="footer-left">
+                SOURCE: NOAA SWPC Real-time Solar Wind (RTSW) Broadcast Service
+            </div>
+            <div class="footer-right">
+                CRITICAL LIMITS: Bz &lt; -10.0 nT [WARNING] | SPEED &gt; 750 km/s [DANGER]
+            </div>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

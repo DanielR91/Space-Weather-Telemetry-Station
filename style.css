@@ -1,0 +1,501 @@
+/* Retro Green Phosphor Styling */
+
+:root {
+    --bg-color: #030804;
+    --bg-darker: #010402;
+    --primary-color: #33ff33;
+    --primary-glow: rgba(51, 255, 51, 0.4);
+    --primary-dim: #008800;
+    --warning-color: #ffb700;
+    --warning-glow: rgba(255, 183, 0, 0.4);
+    --danger-color: #ff3333;
+    --danger-glow: rgba(255, 51, 51, 0.4);
+    --border-style: 1px solid var(--primary-dim);
+    --border-accent: 1px solid var(--primary-color);
+    --font-family: 'Share Tech Mono', 'Courier New', Courier, monospace;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--primary-color);
+    font-family: var(--font-family);
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+    font-size: 14px;
+    line-height: 1.4;
+    text-shadow: 0 0 3px var(--primary-glow);
+    user-select: none;
+}
+
+/* CRT Screen Effects */
+.crt-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, transparent 50%, rgba(0, 0, 0, 0.75) 100%);
+    pointer-events: none;
+    z-index: 999;
+}
+
+.scanlines {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        rgba(18, 16, 16, 0) 50%, 
+        rgba(0, 0, 0, 0.35) 50%
+    );
+    background-size: 100% 4px;
+    pointer-events: none;
+    z-index: 998;
+}
+
+@keyframes flicker {
+    0% { opacity: 0.98; }
+    50% { opacity: 1; }
+    100% { opacity: 0.99; }
+}
+
+.screen-flicker {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(18, 16, 16, 0.015);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 997;
+    animation: flicker 0.15s infinite;
+}
+
+/* Main Container Layout */
+.terminal-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    padding: 10px;
+    background-color: var(--bg-darker);
+    border: 3px double var(--primary-color);
+    margin: 5px;
+    box-shadow: inset 0 0 20px rgba(0, 255, 0, 0.15);
+    border-radius: 4px;
+    position: relative;
+    z-index: 10;
+}
+
+/* Top Header */
+.terminal-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border-bottom: var(--border-style);
+    background-color: rgba(5, 20, 5, 0.5);
+    margin-bottom: 8px;
+    font-size: 15px;
+    letter-spacing: 1px;
+}
+
+.blink-fast {
+    animation: blink 0.8s infinite;
+}
+
+@keyframes blink {
+    0%, 49% { opacity: 1; }
+    50%, 100% { opacity: 0; }
+}
+
+.status-active {
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+.status-connecting {
+    color: var(--warning-color);
+    text-shadow: 0 0 3px var(--warning-glow);
+}
+
+.status-error {
+    color: var(--danger-color);
+    text-shadow: 0 0 3px var(--danger-glow);
+    animation: blink 1s infinite;
+}
+
+/* 55/45 Split Grid */
+.grid-container {
+    display: grid;
+    grid-template-columns: 55fr 45fr;
+    gap: 10px;
+    flex-grow: 1;
+    min-height: 0; /* Important for scrollable containers inside grids */
+}
+
+/* Panel Common Styles */
+.left-panel, .right-panel {
+    display: flex;
+    flex-direction: column;
+    border: var(--border-style);
+    background-color: rgba(3, 10, 4, 0.7);
+    min-height: 0;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 10px;
+    background-color: rgba(0, 30, 0, 0.4);
+    border-bottom: var(--border-style);
+    font-weight: bold;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+}
+
+.panel-meta {
+    color: var(--primary-dim);
+}
+
+.panel-footer {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 10px;
+    background-color: rgba(0, 15, 0, 0.2);
+    border-top: var(--border-style);
+    font-size: 11px;
+    color: var(--primary-dim);
+}
+
+/* Canvas Simulation Container */
+.canvas-wrapper {
+    position: relative;
+    flex-grow: 1;
+    background-color: #010502;
+    overflow: hidden;
+    min-height: 0;
+}
+
+#magnetosphere-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* Floating HUD on Canvas */
+.overlay-stats {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    background-color: rgba(1, 5, 2, 0.85);
+    border: var(--border-style);
+    padding: 10px;
+    border-radius: 2px;
+    pointer-events: none;
+    font-size: 12px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    z-index: 20;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.stat-item .label {
+    color: var(--primary-dim);
+}
+
+.stat-item .value {
+    font-weight: bold;
+}
+
+/* Right Panel Tabs styling */
+.tab-header {
+    display: flex;
+    border-bottom: var(--border-style);
+    background-color: rgba(0, 15, 0, 0.3);
+}
+
+.tab-btn {
+    flex-grow: 1;
+    background: transparent;
+    border: none;
+    border-right: var(--border-style);
+    color: var(--primary-dim);
+    padding: 10px;
+    font-family: var(--font-family);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.tab-btn:last-child {
+    border-right: none;
+}
+
+.tab-btn:hover {
+    background-color: rgba(0, 255, 0, 0.05);
+    color: var(--primary-color);
+}
+
+.tab-btn.active {
+    background-color: rgba(0, 255, 0, 0.15);
+    color: var(--primary-color);
+    font-weight: bold;
+    text-shadow: 0 0 6px var(--primary-glow);
+    border-bottom: 2px solid var(--primary-color);
+}
+
+/* Tab Contents */
+.tab-content {
+    display: none;
+    flex-grow: 1;
+    flex-direction: column;
+    padding: 10px;
+    gap: 12px;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+.tab-content.active {
+    display: flex;
+}
+
+.data-section, .terminal-logs-section {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-height: 0;
+}
+
+.section-title {
+    font-size: 12px;
+    color: var(--primary-dim);
+    font-weight: bold;
+    letter-spacing: 0.5px;
+}
+
+/* Retro Telemetry Grid Table */
+.telemetry-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.telemetry-table th, .telemetry-table td {
+    border: var(--border-style);
+    padding: 6px 8px;
+    text-align: left;
+}
+
+.telemetry-table th {
+    background-color: rgba(0, 40, 0, 0.3);
+    color: var(--primary-dim);
+    font-size: 11px;
+    letter-spacing: 0.5px;
+}
+
+.telemetry-table td.text-highlight {
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+.state-indicator {
+    font-size: 11px;
+    font-weight: bold;
+}
+
+/* Terminal Log Area */
+.terminal-log-window {
+    background-color: rgba(0, 5, 0, 0.8);
+    border: var(--border-style);
+    height: 140px;
+    overflow-y: auto;
+    padding: 8px;
+    font-size: 11.5px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    scroll-behavior: smooth;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.9);
+}
+
+.log-line {
+    word-break: break-all;
+}
+
+.text-dim {
+    color: var(--primary-dim);
+    text-shadow: none;
+}
+
+.text-warning {
+    color: var(--warning-color);
+    text-shadow: 0 0 3px var(--warning-glow);
+}
+
+.text-danger {
+    color: var(--danger-color);
+    text-shadow: 0 0 3px var(--danger-glow);
+}
+
+.text-success {
+    color: var(--primary-color);
+}
+
+/* Alerts Tab Layout */
+.alert-thresholds {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background-color: rgba(10, 0, 0, 0.2);
+    border: 1px dashed rgba(255, 0, 0, 0.2);
+    padding: 10px;
+}
+
+.threshold-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 12px;
+}
+
+.badge {
+    padding: 2px 6px;
+    font-size: 10px;
+    font-weight: bold;
+    border-radius: 2px;
+    text-shadow: none;
+}
+
+.badge-normal {
+    background-color: var(--primary-dim);
+    color: var(--bg-color);
+}
+
+.badge-warning {
+    background-color: var(--warning-color);
+    color: var(--bg-color);
+}
+
+.badge-danger {
+    background-color: var(--danger-color);
+    color: var(--bg-color);
+}
+
+/* Interactive Simulation Overrides UI */
+.control-panel {
+    border-top: var(--border-style);
+    padding-top: 10px;
+    margin-top: auto;
+}
+
+.controls-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    background-color: rgba(0, 15, 0, 0.2);
+    padding: 8px;
+    border: var(--border-style);
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 12px;
+}
+
+.control-group label {
+    color: var(--primary-dim);
+}
+
+.control-group input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    background: var(--primary-dim);
+    height: 4px;
+    outline: none;
+    border-radius: 2px;
+}
+
+.control-group input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    background: var(--primary-color);
+    cursor: pointer;
+    border-radius: 50%;
+    box-shadow: 0 0 5px var(--primary-color);
+}
+
+/* Footer Section */
+.terminal-footer {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 12px;
+    border-top: var(--border-style);
+    margin-top: 8px;
+    font-size: 11px;
+    color: var(--primary-dim);
+    letter-spacing: 0.5px;
+    background-color: rgba(5, 20, 5, 0.3);
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-darker);
+    border-left: var(--border-style);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary-dim);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-color);
+}
+
+/* Responsive Grid for Portrait Monitors / Smaller viewports */
+@media (max-width: 900px) {
+    .grid-container {
+        grid-template-columns: 1fr;
+        grid-template-rows: 50vh 1fr;
+    }
+    
+    .terminal-container {
+        overflow-y: auto;
+        height: auto;
+    }
+    
+    body {
+        overflow: auto;
+    }
+    
+    .canvas-wrapper {
+        min-height: 300px;
+    }
+}
