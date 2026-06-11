@@ -3,9 +3,10 @@
 :root {
     --bg-color: #030804;
     --bg-darker: #010402;
-    --primary-color: #33ff33;
-    --primary-glow: rgba(51, 255, 51, 0.4);
-    --primary-dim: #008800;
+    --primary-color: #39ff14; /* High-brightness neon green */
+    --text-contrast: #e0ffa0; /* Clean, sharp off-white/light-green tint */
+    --primary-glow: rgba(57, 255, 20, 0.55);
+    --primary-dim: #006b04;
     --warning-color: #ffb700;
     --warning-glow: rgba(255, 183, 0, 0.4);
     --danger-color: #ff3333;
@@ -30,7 +31,7 @@ body {
     width: 100vw;
     font-size: 14px;
     line-height: 1.4;
-    text-shadow: 0 0 3px var(--primary-glow);
+    text-shadow: none; /* General text shadow removed for text legibility */
     user-select: none;
 }
 
@@ -105,6 +106,7 @@ body {
     margin-bottom: 8px;
     font-size: 15px;
     letter-spacing: 1px;
+    text-shadow: 0 0 6px var(--primary-glow);
 }
 
 .blink-fast {
@@ -119,16 +121,17 @@ body {
 .status-active {
     color: var(--primary-color);
     font-weight: bold;
+    text-shadow: 0 0 6px var(--primary-glow);
 }
 
 .status-connecting {
     color: var(--warning-color);
-    text-shadow: 0 0 3px var(--warning-glow);
+    text-shadow: 0 0 6px var(--warning-glow);
 }
 
 .status-error {
     color: var(--danger-color);
-    text-shadow: 0 0 3px var(--danger-glow);
+    text-shadow: 0 0 6px var(--danger-glow);
     animation: blink 1s infinite;
 }
 
@@ -138,7 +141,7 @@ body {
     grid-template-columns: 55fr 45fr;
     gap: 10px;
     flex-grow: 1;
-    min-height: 0; /* Important for scrollable containers inside grids */
+    min-height: 0;
 }
 
 /* Panel Common Styles */
@@ -146,7 +149,7 @@ body {
     display: flex;
     flex-direction: column;
     border: var(--border-style);
-    background-color: rgba(3, 10, 4, 0.7);
+    background-color: rgba(2, 6, 3, 0.85);
     min-height: 0;
 }
 
@@ -159,10 +162,12 @@ body {
     font-weight: bold;
     font-size: 12px;
     letter-spacing: 0.5px;
+    text-shadow: 0 0 4px var(--primary-glow);
 }
 
 .panel-meta {
-    color: var(--primary-dim);
+    color: var(--primary-color);
+    opacity: 0.8;
 }
 
 .panel-footer {
@@ -172,14 +177,15 @@ body {
     background-color: rgba(0, 15, 0, 0.2);
     border-top: var(--border-style);
     font-size: 11px;
-    color: var(--primary-dim);
+    color: var(--primary-color);
+    opacity: 0.7;
 }
 
 /* Canvas Simulation Container */
 .canvas-wrapper {
     position: relative;
     flex-grow: 1;
-    background-color: #010502;
+    background-color: #010402;
     overflow: hidden;
     min-height: 0;
 }
@@ -198,7 +204,7 @@ body {
     position: absolute;
     top: 15px;
     left: 15px;
-    background-color: rgba(1, 5, 2, 0.85);
+    background-color: rgba(2, 8, 3, 0.95);
     border: var(--border-style);
     padding: 10px;
     border-radius: 2px;
@@ -218,11 +224,12 @@ body {
 }
 
 .stat-item .label {
-    color: var(--primary-dim);
+    color: var(--text-contrast);
 }
 
 .stat-item .value {
     font-weight: bold;
+    text-shadow: 0 0 4px var(--primary-glow);
 }
 
 /* Right Panel Tabs styling */
@@ -237,7 +244,8 @@ body {
     background: transparent;
     border: none;
     border-right: var(--border-style);
-    color: var(--primary-dim);
+    color: var(--primary-color);
+    opacity: 0.6;
     padding: 10px;
     font-family: var(--font-family);
     font-size: 13px;
@@ -252,12 +260,13 @@ body {
 
 .tab-btn:hover {
     background-color: rgba(0, 255, 0, 0.05);
-    color: var(--primary-color);
+    opacity: 0.9;
 }
 
 .tab-btn.active {
-    background-color: rgba(0, 255, 0, 0.15);
+    background-color: rgba(0, 255, 0, 0.12);
     color: var(--primary-color);
+    opacity: 1;
     font-weight: bold;
     text-shadow: 0 0 6px var(--primary-glow);
     border-bottom: 2px solid var(--primary-color);
@@ -287,16 +296,29 @@ body {
 
 .section-title {
     font-size: 12px;
-    color: var(--primary-dim);
+    color: var(--primary-color);
     font-weight: bold;
     letter-spacing: 0.5px;
+    text-shadow: 0 0 4px var(--primary-glow);
 }
 
-/* Retro Telemetry Grid Table */
+/* Retro Telemetry Grid Table & Backgrounds */
+.data-section {
+    background-color: #020803; /* Deep black-green container card */
+    padding: 8px;
+    border: var(--border-style);
+    border-radius: 2px;
+}
+
+.telemetry-state-register {
+    background-color: #020803;
+}
+
 .telemetry-table {
     width: 100%;
     border-collapse: collapse;
     font-size: 13px;
+    background-color: #020803;
 }
 
 .telemetry-table th, .telemetry-table td {
@@ -306,15 +328,22 @@ body {
 }
 
 .telemetry-table th {
-    background-color: rgba(0, 40, 0, 0.3);
-    color: var(--primary-dim);
+    background-color: rgba(0, 40, 0, 0.6);
+    color: var(--primary-color);
     font-size: 11px;
     letter-spacing: 0.5px;
+    text-shadow: 0 0 3px var(--primary-glow);
+}
+
+.telemetry-table td {
+    color: var(--text-contrast); /* Crisp light-green tint */
+    text-shadow: none; /* No shadow blur for small values */
 }
 
 .telemetry-table td.text-highlight {
     color: var(--primary-color);
     font-weight: bold;
+    text-shadow: 0 0 2px var(--primary-glow); /* Slight glow on highlighted values */
 }
 
 .state-indicator {
@@ -323,10 +352,17 @@ body {
 }
 
 /* Terminal Log Area */
-.terminal-log-window {
-    background-color: rgba(0, 5, 0, 0.8);
+.terminal-logs-section {
+    background-color: #020803;
+    padding: 8px;
     border: var(--border-style);
-    height: 140px;
+    border-radius: 2px;
+}
+
+.terminal-log-window, #raw-telemetry-datastream {
+    background-color: #020803; /* Deep black-green background */
+    border: 1px solid rgba(0, 107, 4, 0.4);
+    height: 160px;
     overflow-y: auto;
     padding: 8px;
     font-size: 11.5px;
@@ -334,30 +370,34 @@ body {
     flex-direction: column;
     gap: 4px;
     scroll-behavior: smooth;
-    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.9);
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.95);
 }
 
 .log-line {
     word-break: break-all;
+    color: var(--text-contrast); /* Crisp readability color */
+    text-shadow: none; /* Cleared small text blurs */
 }
 
 .text-dim {
-    color: var(--primary-dim);
+    color: var(--primary-color);
+    opacity: 0.5;
     text-shadow: none;
 }
 
 .text-warning {
     color: var(--warning-color);
-    text-shadow: 0 0 3px var(--warning-glow);
+    text-shadow: 0 0 2px var(--warning-glow);
 }
 
 .text-danger {
     color: var(--danger-color);
-    text-shadow: 0 0 3px var(--danger-glow);
+    text-shadow: 0 0 2px var(--danger-glow);
 }
 
 .text-success {
     color: var(--primary-color);
+    text-shadow: 0 0 2px var(--primary-glow);
 }
 
 /* Alerts Tab Layout */
@@ -365,8 +405,8 @@ body {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    background-color: rgba(10, 0, 0, 0.2);
-    border: 1px dashed rgba(255, 0, 0, 0.2);
+    background-color: rgba(20, 0, 0, 0.35);
+    border: 1px dashed rgba(255, 50, 50, 0.3);
     padding: 10px;
 }
 
@@ -375,6 +415,7 @@ body {
     align-items: center;
     gap: 12px;
     font-size: 12px;
+    color: var(--text-contrast);
 }
 
 .badge {
@@ -400,53 +441,6 @@ body {
     color: var(--bg-color);
 }
 
-/* Interactive Simulation Overrides UI */
-.control-panel {
-    border-top: var(--border-style);
-    padding-top: 10px;
-    margin-top: auto;
-}
-
-.controls-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-    background-color: rgba(0, 15, 0, 0.2);
-    padding: 8px;
-    border: var(--border-style);
-}
-
-.control-group {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    font-size: 12px;
-}
-
-.control-group label {
-    color: var(--primary-dim);
-}
-
-.control-group input[type="range"] {
-    -webkit-appearance: none;
-    width: 100%;
-    background: var(--primary-dim);
-    height: 4px;
-    outline: none;
-    border-radius: 2px;
-}
-
-.control-group input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 12px;
-    height: 12px;
-    background: var(--primary-color);
-    cursor: pointer;
-    border-radius: 50%;
-    box-shadow: 0 0 5px var(--primary-color);
-}
-
 /* Footer Section */
 .terminal-footer {
     display: flex;
@@ -455,7 +449,8 @@ body {
     border-top: var(--border-style);
     margin-top: 8px;
     font-size: 11px;
-    color: var(--primary-dim);
+    color: var(--primary-color);
+    opacity: 0.8;
     letter-spacing: 0.5px;
     background-color: rgba(5, 20, 5, 0.3);
 }
