@@ -42,7 +42,8 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: radial-gradient(circle, transparent 50%, rgba(0, 0, 0, 0.75) 100%);
+    /* Lightened vignette to achieve uniform edge-to-edge brightness */
+    background: radial-gradient(circle, transparent 85%, rgba(0, 0, 0, 0.15) 100%);
     pointer-events: none;
     z-index: 999;
 }
@@ -53,9 +54,10 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
+    /* Scanline opacity dropped down to max 0.05 */
     background: linear-gradient(
         rgba(18, 16, 16, 0) 50%, 
-        rgba(0, 0, 0, 0.35) 50%
+        rgba(0, 0, 0, 0.05) 50%
     );
     background-size: 100% 4px;
     pointer-events: none;
@@ -106,7 +108,7 @@ body {
     margin-bottom: 8px;
     font-size: 15px;
     letter-spacing: 1px;
-    text-shadow: 0 0 6px var(--primary-glow);
+    text-shadow: 0 0 2px var(--primary-glow); /* Cap glow at 2px */
 }
 
 .blink-fast {
@@ -121,17 +123,17 @@ body {
 .status-active {
     color: var(--primary-color);
     font-weight: bold;
-    text-shadow: 0 0 6px var(--primary-glow);
+    text-shadow: 0 0 2px var(--primary-glow); /* Cap glow at 2px */
 }
 
 .status-connecting {
     color: var(--warning-color);
-    text-shadow: 0 0 6px var(--warning-glow);
+    text-shadow: 0 0 2px var(--warning-glow); /* Cap glow at 2px */
 }
 
 .status-error {
     color: var(--danger-color);
-    text-shadow: 0 0 6px var(--danger-glow);
+    text-shadow: 0 0 2px var(--danger-glow); /* Cap glow at 2px */
     animation: blink 1s infinite;
 }
 
@@ -162,7 +164,7 @@ body {
     font-weight: bold;
     font-size: 12px;
     letter-spacing: 0.5px;
-    text-shadow: 0 0 4px var(--primary-glow);
+    text-shadow: 0 0 2px var(--primary-glow); /* Cap glow at 2px */
 }
 
 .panel-meta {
@@ -229,7 +231,7 @@ body {
 
 .stat-item .value {
     font-weight: bold;
-    text-shadow: 0 0 4px var(--primary-glow);
+    text-shadow: 0 0 2px var(--primary-glow); /* Cap glow at 2px */
 }
 
 /* Right Panel Tabs styling */
@@ -268,7 +270,7 @@ body {
     color: var(--primary-color);
     opacity: 1;
     font-weight: bold;
-    text-shadow: 0 0 6px var(--primary-glow);
+    text-shadow: 0 0 2px var(--primary-glow); /* Cap glow at 2px */
     border-bottom: 2px solid var(--primary-color);
 }
 
@@ -299,7 +301,7 @@ body {
     color: var(--primary-color);
     font-weight: bold;
     letter-spacing: 0.5px;
-    text-shadow: 0 0 4px var(--primary-glow);
+    text-shadow: 0 0 2px var(--primary-glow); /* Cap glow at 2px */
 }
 
 /* Retro Telemetry Grid Table & Backgrounds */
@@ -332,18 +334,19 @@ body {
     color: var(--primary-color);
     font-size: 11px;
     letter-spacing: 0.5px;
-    text-shadow: 0 0 3px var(--primary-glow);
+    text-shadow: 0 0 2px var(--primary-glow); /* Cap th glow at 2px */
 }
 
 .telemetry-table td {
     color: var(--text-contrast); /* Crisp light-green tint */
-    text-shadow: none; /* No shadow blur for small values */
+    font-weight: bold;          /* Increased thickness for legibility */
+    text-shadow: none;          /* Completely removed text-shadow for small fonts */
 }
 
 .telemetry-table td.text-highlight {
     color: var(--primary-color);
     font-weight: bold;
-    text-shadow: 0 0 2px var(--primary-glow); /* Slight glow on highlighted values */
+    text-shadow: none;          /* Completely removed text-shadow for small fonts */
 }
 
 .state-indicator {
@@ -376,7 +379,8 @@ body {
 .log-line {
     word-break: break-all;
     color: var(--text-contrast); /* Crisp readability color */
-    text-shadow: none; /* Cleared small text blurs */
+    font-weight: 600;            /* Increased thickness for legibility */
+    text-shadow: none;          /* Completely removed text-shadow for small fonts */
 }
 
 .text-dim {
@@ -387,17 +391,17 @@ body {
 
 .text-warning {
     color: var(--warning-color);
-    text-shadow: 0 0 2px var(--warning-glow);
+    text-shadow: none;          /* Removed glow for small warnings */
 }
 
 .text-danger {
     color: var(--danger-color);
-    text-shadow: 0 0 2px var(--danger-glow);
+    text-shadow: none;          /* Removed glow for small errors */
 }
 
 .text-success {
     color: var(--primary-color);
-    text-shadow: 0 0 2px var(--primary-glow);
+    text-shadow: none;          /* Removed glow for small success statements */
 }
 
 /* Alerts Tab Layout */
