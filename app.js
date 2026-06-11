@@ -605,3 +605,32 @@ async function fetchAlertHistory() {
 // Trigger alert history fetch on boot
 setTimeout(fetchAlertHistory, 1000);
 
+// --- Solar Cycle 25 Timeline Calculator ---
+function calculateSolarCycleProgress() {
+    const startDate = new Date('2019-12-01T00:00:00Z');
+    const endDate = new Date('2030-12-31T23:59:59Z');
+    const now = new Date();
+
+    const totalDuration = endDate - startDate;
+    const elapsed = now - startDate;
+    const progress = Math.max(0, Math.min(1, elapsed / totalDuration));
+
+    const percentage = (progress * 100).toFixed(1);
+    
+    // Draw 10-segment text progress bar
+    const segments = 10;
+    const filled = Math.round(progress * segments);
+    const barString = '[' + '='.repeat(filled) + '-'.repeat(segments - filled) + ']';
+
+    const barEl = document.getElementById('cycle-progress-bar');
+    const valEl = document.getElementById('cycle-progress-val');
+    if (barEl && valEl) {
+        barEl.textContent = barString;
+        valEl.textContent = `${percentage}%`;
+    }
+}
+
+// Trigger cycle timeline progress calculation
+calculateSolarCycleProgress();
+
+

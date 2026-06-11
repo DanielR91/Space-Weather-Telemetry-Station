@@ -573,6 +573,32 @@ body {
     text-shadow: none; /* perfectly crisp, zero glow */
 }
 
+/* Solar Cycle Progress Container */
+.cycle-progress-section {
+    background-color: #020803;
+    padding: 8px;
+    border: var(--border-style);
+    border-radius: 2px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.cycle-progress-container {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px;
+    background-color: rgba(0, 10, 0, 0.35);
+    border: 1px solid rgba(0, 107, 4, 0.25);
+}
+
+.progress-line {
+    font-size: 12px;
+    color: var(--text-contrast);
+    font-weight: 600;
+}
+
 /* Responsive Grid for Portrait Monitors / Smaller viewports */
 @media (max-width: 900px) {
     .grid-container {
