@@ -557,3 +557,51 @@ async function pollNOAAData() {
 let pollingInterval = setInterval(pollNOAAData, 60000);
 // Initial trigger after 2 seconds to allow interface setup lines to display
 setTimeout(pollNOAAData, 2000);
+
+// --- Historical severity registry parser ---
+async function fetchAlertHistory() {
+    try {
+        const response = await fetch('https://services.swpc.noaa.gov/products/alerts.json');
+        if (!response.ok) throw new Error('Alert history unreachable');
+        const alerts = await response.json();
+
+        let lastMinor = null;
+        let lastStrong = null;
+        let lastExtreme = null;
+
+        for (const alert of alerts) {
+            const msg = alert.message || '';
+            const dateStr = alert.issue_datetime ? alert.issue_datetime.substring(0, 10) : '';
+
+            // Check Extreme (G5)
+            if (!lastExtreme && (msg.includes('G5') || /NOAA Scale:\s*G5/i.test(msg))) {
+                lastExtreme = dateStr;
+            }
+            // Check Strong (G3, G4)
+            if (!lastStrong && (msg.includes('G3') || msg.includes('G4') || /NOAA Scale:\s*G[34]/i.test(msg))) {
+                lastStrong = dateStr;
+            }
+            // Check Minor (G1, G2)
+            if (!lastMinor && (msg.includes('G1') || msg.includes('G2') || /NOAA Scale:\s*G[12]/i.test(msg))) {
+                lastMinor = dateStr;
+            }
+
+            // If we found all three, we can break early
+            if (lastMinor && lastStrong && lastExtreme) break;
+        }
+
+        document.getElementById('hist-minor').textContent = lastMinor || 'NO ACTIVE RECORDS (30D)';
+        document.getElementById('hist-strong').textContent = lastStrong || 'NO ACTIVE RECORDS (30D)';
+        document.getElementById('hist-extreme').textContent = lastExtreme || 'NO ACTIVE RECORDS (30D)';
+
+    } catch (error) {
+        console.warn('Failed to retrieve NOAA alert history:', error.message);
+        document.getElementById('hist-minor').textContent = 'NO ACTIVE RECORDS (30D)';
+        document.getElementById('hist-strong').textContent = 'NO ACTIVE RECORDS (30D)';
+        document.getElementById('hist-extreme').textContent = 'NO ACTIVE RECORDS (30D)';
+    }
+}
+
+// Trigger alert history fetch on boot
+setTimeout(fetchAlertHistory, 1000);
+

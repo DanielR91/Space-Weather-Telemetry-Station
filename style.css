@@ -541,6 +541,38 @@ body {
     font-weight: 600;
 }
 
+/* Historical Severity Registry Container */
+.historical-registry-section {
+    background-color: #020803;
+    padding: 8px;
+    border: var(--border-style);
+    border-radius: 2px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.historical-registry-container {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px;
+    background-color: rgba(0, 10, 0, 0.35);
+    border: 1px solid rgba(0, 107, 4, 0.25);
+}
+
+.registry-line {
+    font-size: 12px;
+    color: var(--text-contrast);
+    font-weight: 600;
+}
+
+.registry-val {
+    color: var(--primary-color);
+    font-weight: bold;
+    text-shadow: none; /* perfectly crisp, zero glow */
+}
+
 /* Responsive Grid for Portrait Monitors / Smaller viewports */
 @media (max-width: 900px) {
     .grid-container {
