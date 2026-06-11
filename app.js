@@ -385,6 +385,39 @@ function getValueState(value, type) {
     return { text: 'NOMINAL', color: 'var(--primary-color)' };
 }
 
+// Update Dynamic Status Translation summary block
+function updateStatusSummary(speed, density, bz) {
+    const badge = document.getElementById('status-summary-badge');
+    const textEl = document.getElementById('status-summary-text');
+    if (!badge || !textEl) return;
+
+    let severity = 'NOMINAL';
+    let severityClass = 'status-nominal';
+    let summaryText = '';
+
+    if (state.apiStatus === 'DISCONNECTED') {
+        severity = 'DISCONNECTED';
+        severityClass = 'status-tactical';
+        summaryText = `CRITICAL: NOAA telemetry stream connection lost. Visual system holding on last recorded parameters (${Math.round(speed)} km/s | Bz: ${bz.toFixed(1)} nT). Re-establishing receiver handshake...`;
+    } else if (bz <= -10 || speed >= 700) {
+        severity = 'TACTICAL ALERT';
+        severityClass = 'status-tactical';
+        summaryText = `CRITICAL: Severe magnetospheric compression detected. Solar wind speed is extremely high at ${Math.round(speed)} km/s with a strong southward IMF Bz field of ${bz.toFixed(1)} nT. Deflection efficiency is severely degraded.`;
+    } else if (bz <= -5 || speed >= 500) {
+        severity = 'UNSTABLE';
+        severityClass = 'status-unstable';
+        summaryText = `WARNING: Space weather environment is unstable. Increased solar wind velocity of ${Math.round(speed)} km/s and a southward Bz field of ${bz.toFixed(1)} nT are inducing moderate magnetospheric erosion.`;
+    } else {
+        severity = 'NOMINAL';
+        severityClass = 'status-nominal';
+        summaryText = `Solar wind conditions are nominal at ${Math.round(speed)} km/s with a stable magnetic Bz index of ${bz.toFixed(1)} nT. Particle deflection arrays and geomagnetic margins are holding steady at normal capacity.`;
+    }
+
+    badge.textContent = `STATUS: ${severity}`;
+    badge.className = `summary-badge ${severityClass}`;
+    textEl.textContent = summaryText;
+}
+
 // Update DOM Telemetry Values
 function updateTelemetryUI() {
     overlaySpeed.textContent = `${state.speed.toFixed(1)} km/s`;
@@ -418,6 +451,9 @@ function updateTelemetryUI() {
 
     stateTemp.textContent = 'NOMINAL';
     stateTemp.style.color = 'var(--primary-color)';
+
+    // Update the dynamic status summary
+    updateStatusSummary(state.speed, state.density, state.bz);
 }
 
 // Main poll function
@@ -511,6 +547,9 @@ async function pollNOAAData() {
         stateBz.style.color = 'var(--warning-color)';
         stateTemp.textContent = 'HOLDING';
         stateTemp.style.color = 'var(--warning-color)';
+
+        // Update the dynamic status summary under disconnected state
+        updateStatusSummary(state.speed, state.density, state.bz);
     }
 }
 

@@ -478,6 +478,69 @@ body {
     background: var(--primary-color);
 }
 
+/* Current Status Summary Container */
+.status-summary-section {
+    background-color: #020803;
+    padding: 8px;
+    border: var(--border-style);
+    border-radius: 2px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.status-summary-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 8px;
+    background-color: rgba(0, 10, 0, 0.35);
+    border: 1px solid rgba(0, 107, 4, 0.25);
+}
+
+.summary-badge {
+    align-self: flex-start;
+    padding: 4px 8px;
+    font-size: 11px;
+    font-weight: bold;
+    border-radius: 2px;
+    text-transform: uppercase;
+}
+
+.status-nominal {
+    background-color: rgba(57, 255, 20, 0.15);
+    border: 1px solid var(--primary-color);
+    color: var(--primary-color);
+    text-shadow: 0 0 2px var(--primary-glow);
+}
+
+.status-unstable {
+    background-color: rgba(255, 183, 0, 0.15);
+    border: 1px solid var(--warning-color);
+    color: var(--warning-color);
+    text-shadow: 0 0 2px var(--warning-glow);
+}
+
+.status-tactical {
+    background-color: var(--danger-color);
+    color: #ffffff;
+    border: 1px solid var(--danger-color);
+    font-weight: bold;
+    animation: pulse-danger 1s infinite alternate;
+}
+
+@keyframes pulse-danger {
+    0% { background-color: rgba(255, 51, 51, 0.5); }
+    100% { background-color: var(--danger-color); box-shadow: 0 0 6px var(--danger-color); }
+}
+
+#status-summary-text {
+    color: var(--text-contrast);
+    font-size: 12.5px;
+    line-height: 1.4;
+    font-weight: 600;
+}
+
 /* Responsive Grid for Portrait Monitors / Smaller viewports */
 @media (max-width: 900px) {
     .grid-container {
